@@ -8,6 +8,8 @@ import numpy as np
 import time
 from os import listdir
 from os.path import isfile, join
+import csv
+from collections import Counter
 
 
 def read_int(f):
@@ -58,16 +60,63 @@ def get_pics_from_file(filename):
     f_pic.close()
     return tab_pics, info
 
+def average_column (csv_filepath):
+    column_totals = Counter()
+    with open('../Val_pics_CSV/'+csv_filepath,"rb") as f:
+        reader = csv.reader(f)
+        row_count = 0.0
+        for row in reader:
+            for column_idx, column_value in enumerate(row):
+                try:
+                    n = float(column_value)
+                    column_totals[column_idx] += n
+                except ValueError:
+                    print ("Error -- ({}) Column({}) could not be converted to float!".format(column_value, column_idx))                   
+            row_count += 1.0            
+
+    # row_count is now 1 too many so decrement it back down
+    row_count -= 1.0
+
+    # make sure column index keys are in order
+    column_indexes = column_totals.keys()
+    column_indexes.sort()
+
+    # calculate per column averages using a list comprehension
+    averages = [column_totals[idx]/row_count for idx in column_indexes]
+    return averages
+
+def Modecsv(file):
+
+	data = pd.read_csv('../Val_pics_CSV/'+ file) 
+	data = data.mode(dropna=False)
+	data = data.head(1)
+	name = [file]
+	data['Lettre'] = name
+	#data.to_csv ('../Mode_CSV/'+ file, index = False, header=True)
+	return data
+
+
 
 if __name__ == "__main__":
 
 
 	#Traitement densité sur chaque .bin
-	fichiers_liste = [f for f in listdir("../data/") if isfile(join("../data/", f))] #liste des fichier .bin
-
+	fichiers_liste = [f for f in listdir("../Val_pics_CSV/") if isfile(join("../Val_pics_CSV/", f))] #liste des fichier .bin
+	CSV = pd.DataFrame()
 	for i in range(len(fichiers_liste)):
+		print("Traitement fichier : " + fichiers_liste[i]+ "\n")
+		#print(Modecsv(fichiers_liste[i]))
+		CSV = pd.concat([CSV, Modecsv(fichiers_liste[i])])
+
+	print(CSV)
+	CSV.to_csv ('../Mode_CSV/valeur_dominante_concat.csv', index = False, header=True)
+
+	
+
+
 	    
-	    graph, info = get_pics_from_file("../data/"+fichiers_liste[i]) #Recuperation des donné du .bin 
+
+'''
 	    nom = str(fichiers_liste[i])
 	    nom = nom.replace('.bin','')
 	
@@ -89,7 +138,7 @@ if __name__ == "__main__":
 	    plt.savefig(nom) #SAVE graph à la racine du programme 
 
 
-	    '''
+	    
 	    #Deuxieme affichage
 	    plt.subplot(212)
 	    plt.plot(range(1,info["nb_pics"]+1), graph[234], 'ko')
