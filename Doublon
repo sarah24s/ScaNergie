@@ -1,0 +1,24 @@
+import os
+
+import matplotlib.pyplot as plt
+import numpy as np
+import time
+import pandas as pd
+listcolumns = []
+for i in range(0, 17):
+    listcolumns.append('col' + str(i))
+
+#df = pd.DataFrame(pd.read_excel('pics_F.xls'), columns=listcolumns)
+#df1 = pd.DataFrame(pd.read_excel('pics_LOGINMDP.xls'), columns=listcolumns)
+
+listfichiers = os.listdir("Hackaton/data2")
+dfa = pd.read_csv('pics_LOGINMDP.csv')
+dfa.iloc[:,:]
+
+for f in listfichiers:
+    print(f)
+    if ".csv" in f:
+        print("ici")
+        df = pd.DataFrame(pd.read_csv("data2/"+f), columns=listcolumns)
+        print(df.duplicated(keep = False))
+        #df[df.duplicated(keep=False)].to_excel('Doublon'+f)
